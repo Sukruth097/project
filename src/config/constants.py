@@ -1,6 +1,6 @@
-from datetime import datetime
-TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
-MONGODB_URL=""
-DATABASE_NAME=""
-LOGS_COLLECTION_NAME=""
-COLLECTION_NAME=""
+import time
+TIMESTAMP = time.strftime("%Y-%m-%d %I:%M:%S %p", time.localtime())
+# MONGODB_URL="mongodb+srv://sukruth:<db_password>@cluster0.yd8mlom.mongodb.net/"
+DATABASE_NAME="POC"
+LOGS_COLLECTION_NAME="logging"
+ERROR_COLLECTION_NAME="poc_error_logs"
