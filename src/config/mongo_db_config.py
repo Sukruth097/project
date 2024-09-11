@@ -7,8 +7,7 @@ from src.config.constants import *
 # from src.logger import Logger
 # from src.exception import Exception
 
-# Load environment variables from .env file
-load_dotenv()  # Add this line
+load_dotenv() 
 
 ca = certifi.where()
 

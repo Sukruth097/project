@@ -3,3 +3,8 @@ Educational_LLM_Bot.egg-info
 Educational_LLM_Bot.egg-info/*
 logs
 logs/*
+artifacts
+artifacts/*
+data
+data/*
+__pycache__/

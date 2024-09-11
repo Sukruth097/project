@@ -17,8 +17,6 @@ class PocException(Exception):
         _, _, exc_tb = error_detail.exc_info()
         filename = exc_tb.tb_frame.f_code.co_filename
         line_no = exc_tb.tb_lineno
-        # timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        # user = os.getlogin()
 
         error_message = (f"Error occurred script name [{filename}] at line number [{line_no}] and error message is [{error_message}]")
         return error_message
@@ -31,7 +29,6 @@ class PocException(Exception):
         user = os.getlogin()
 
         client = MongodbClient(database_name=DATABASE_NAME,collection_name=ERROR_COLLECTION_NAME,)
-        # print("Connection to MongoDB was successful.")
         
         log_record = {
             "timestamp": timestamp,
@@ -41,7 +38,6 @@ class PocException(Exception):
             "error_message": self.error_message
         }
         client.upload_record(log_record)
-        # collection.insert_one(log_record)
 
     def __repr__(self):
         return self.error_message
@@ -49,14 +45,14 @@ class PocException(Exception):
     def __str__(self):
         return self.error_message
     
-if __name__ == "__main__":
-    logger.info(f"checking log func")
-    try:
-        # Simulate a ZeroDivisionError
-        result = 7 / 0
-    except Exception as e:
-        # Log the error
-        logger.error(f"Exception----{e}")
-        # Catch the error and create a PocException
-        raise PocException(e, sys)
+# if __name__ == "__main__":
+#     logger.info(f"checking log func")
+#     try:
+#         # Simulate a ZeroDivisionError
+#         result = 7 / 0
+#     except Exception as e:
+#         # Log the error
+#         logger.error(f"Exception----{e}")
+#         # Catch the error and create a PocException
+#         raise PocException(e, sys)
 
