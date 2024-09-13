@@ -18,6 +18,8 @@ class DataIngestionConfig():
         self.data_ingestion_dir = os.path.join(ARTIFACT_DIR,DATA_INGESTION_ARTIFACT_DIR)
         self.raw_data_dir = os.path.join(self.data_ingestion_dir,DATA_INGESTION_RAW_DATA_DIR)
         self.processed_data_dir = os.path.join(self.data_ingestion_dir,DATA_INGESTION_PROCESSED_DATA_DIR)
+        self.metadata_dir= os.path.join(self.data_ingestion_dir,DATA_INGESTION_METADATA_DIR)
+        self.metadata_filename= os.path.join("src",DATA_INGESTION_METADATA_DIR,DATA_INGESTION_METADATA_FILENAME)
         self.processed_data_filename = DATA_INGESTION_PROCESSED_DATA_FILENAME
         self.azure_container_name = CONTAINER_NAME
         self.azure_blob_name = BLOB_NAME

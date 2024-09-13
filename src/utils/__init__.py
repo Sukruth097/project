@@ -30,6 +30,7 @@ def write_yaml_file(file_path: str, data: dict = None):
         with open(file_path, "w") as yaml_file:
             if data is not None:
                 yaml.dump(data, yaml_file)
+        return file_path
     except Exception as e:
         raise PocException(e, sys)
 
@@ -61,3 +62,29 @@ def read_yaml_file(file_path: str) -> dict:
 #             logger.info(f"Directory created: {dir_path}")
 #     except Exception as e:
 #         raise PocException(e, sys)
+
+def write_json_file(file_path: str, data: dict = None):
+    """
+    Create JSON file 
+    file_path: str
+    data: dict
+    """
+    try:
+        # os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w") as json_file:
+            if data is not None:
+                json.dump(data, json_file, indent=4)
+        return file_path
+    except Exception as e:
+        raise PocException(e, sys)
+
+def read_json_file(file_path: str) -> dict:
+    """
+    Reads a JSON file and returns the contents as a dictionary.
+    file_path: str
+    """
+    try:
+        with open(file_path, 'r') as json_file:
+            return json.load(json_file)
+    except Exception as e:
+        raise PocException(e, sys)

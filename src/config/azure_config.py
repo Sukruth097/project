@@ -48,7 +48,32 @@ class AzureBlobManager:
         except Exception as e:
             logger.error(f"Failed to get metadata for {blob_name} in {container_name}: {e}")
             raise PocException(f"Failed to get metadata for {blob_name} in {container_name}", sys) 
-
+        
+    @log_execution_time
+    def list_blob_names_and_files(self, container_name):
+        if not self.container_exists(container_name):
+            logger.error(f"Container {container_name} does not exist")
+            raise PocException(f"Container {container_name} does not exist")
+        logger.info(f"Listing all blob names in {container_name}")
+        try:
+            container_client = self.storage_account_client.get_container_client(container_name)
+            logger.info(f"Checking for blobs in container:{container_name}")
+            blobs = container_client.list_blobs()
+            blob_with_filenames = [blob.name for blob in blobs]
+            blob_names = set([blob.split('/')[0] for blob in blob_with_filenames])
+            logger.info(f"Blob names in {container_name}: {blob_names}")
+            logger.info(f"Found {len(blob_names)} no of blobs in container:{container_name} ")
+            
+            # Log the number of folders in each blob
+            for blob_name in blob_names:
+                folder_count = sum(1 for blob in blob_with_filenames if blob.startswith(blob_name + '/'))
+                logger.info(f"Blob {blob_name} contains {folder_count} folders")
+            
+            return blob_names, blob_with_filenames
+        except Exception as e:
+            logger.error(f"Failed to list blobs in {container_name}: {e}")
+            raise PocException(f"Failed to list blobs in {container_name}", sys)
+        
     @log_execution_time
     def download_allfiles_in_container(self, container_name, download_dir):
         logger.info(f"Starting download of all files from {container_name} to {download_dir}")
@@ -83,29 +108,29 @@ class AzureBlobManager:
         except Exception as e:
             logger.error(f"Failed to download multiple files from {container_name}: {e}")
             raise PocException(f"Failed to download multiple files from {container_name}", sys)
-
+        
     @log_execution_time
-    def download_allfiles_in_blob(self, container_name, download_dir, blob_name):
+    def download_allfiles_in_blob(self, container_name, download_dir, blob_name, existing_files):
         if not self.container_exists(container_name):
             logger.error(f"Container {container_name} does not exist")
             raise PocException(f"Container {container_name} does not exist", sys)
         
         logger.info(f"Starting download of files from {container_name}/{blob_name} to {download_dir}")
         try:
-            os.makedirs(download_dir, exist_ok=True)
-            logger.info(f"Created download directory: {download_dir}")
-            
             container_client = self.storage_account_client.get_container_client(container_name)
-            
             blobs = container_client.list_blobs(name_starts_with=blob_name)
+            blob_with_filenames = []
+            
             download_count = 0  # Counter for downloaded files
             
             for blob in blobs:
-                blob_client = container_client.get_blob_client(blob.name)
-                # if not blob_client.exists():
-                #     logger.error(f"Blob {blob.name} does not exist in {container_name}")
-                #     raise PocException(f"Blob {blob.name} does not exist in {container_name}", sys)
+                if blob.name in existing_files:
+                    logger.info(f"Skipping download of {blob.name} as it is already present in metadata and data ingestion data folder")
+                    print(f"Skipping download of {blob.name} as it is already present in metadata and data ingestion data folder")
+                    continue
                 
+                blob_client = container_client.get_blob_client(blob.name)
+                blob_with_filenames.append(blob.name)
                 blob_download_path = os.path.join(download_dir, blob.name)
                 os.makedirs(os.path.dirname(blob_download_path), exist_ok=True)
                 logger.info(f"Created directory for blob: {os.path.dirname(blob_download_path)}")
@@ -114,17 +139,54 @@ class AzureBlobManager:
                     download_file.write(blob_client.download_blob().readall())
                 logger.info(f"Downloaded {blob.name} to {blob_download_path}")
                 
-                # Log metadata
-                metadata = self.get_metadata(container_name, blob.name)
-                logger.info(f"Metadata for {blob.name}: {metadata}")
-                
                 download_count += 1  # Increment counter for each downloaded file
             
             logger.info(f"Total number of files downloaded: {download_count}")
-            return download_dir
+            download_path = os.path.join(download_dir,blob_name)
+            logger.info(f"Downloaded path: {download_path}")
+            return download_path, blob_with_filenames
         except Exception as e:
             logger.error(f"Failed to download multiple files from {container_name}/{blob_name}: {e}")
             raise PocException(f"Failed to download multiple files from {container_name}/{blob_name}", sys)
+
+    # # ... ex
+    # @log_execution_time
+    # def download_allfiles_in_blob(self, container_name, download_dir, blob_name):
+    #     if not self.container_exists(container_name):
+    #         logger.error(f"Container {container_name} does not exist")
+    #         raise PocException(f"Container {container_name} does not exist", sys)
+        
+    #     logger.info(f"Starting download of files from {container_name}/{blob_name} to {download_dir}")
+    #     try:
+    #         # os.makedirs(download_dir, exist_ok=True)
+    #         # logger.info(f"Created download directory: {download_dir}")
+            
+    #         container_client = self.storage_account_client.get_container_client(container_name)
+    #         blobs = container_client.list_blobs(name_starts_with=blob_name)
+    #         blob_with_filenames = []
+            
+    #         download_count = 0  # Counter for downloaded files
+            
+    #         for blob in blobs:
+    #             blob_client = container_client.get_blob_client(blob.name)
+    #             blob_with_filenames.append(blob.name)
+    #             blob_download_path = os.path.join(download_dir,blob.name)
+    #             os.makedirs(os.path.dirname(blob_download_path), exist_ok=True)
+    #             logger.info(f"Created directory for blob: {os.path.dirname(blob_download_path)}")
+                
+    #             with open(blob_download_path, "wb") as download_file:
+    #                 download_file.write(blob_client.download_blob().readall())
+    #             logger.info(f"Downloaded {blob.name} to {blob_download_path}")
+                
+    #             download_count += 1  # Increment counter for each downloaded file
+            
+    #         logger.info(f"Total number of files downloaded: {download_count}")
+    #         download_path = os.path.dirname(blob_download_path)
+    #         logger.info(f"downloaded path :{download_path}")
+    #         return download_path,blob_with_filenames
+    #     except Exception as e:
+    #         logger.error(f"Failed to download multiple files from {container_name}/{blob_name}: {e}")
+    #         raise PocException(f"Failed to download multiple files from {container_name}/{blob_name}", sys)
 
     @log_execution_time
     def upload_files(self, container_name, folder_path, blob_name):
@@ -155,30 +217,7 @@ class AzureBlobManager:
             logger.error(f"Failed to upload files from {folder_path} to {container_name}/{blob_name}: {e}")
             raise PocException(e)
 
-    @log_execution_time
-    def list_blob_names_and_files(self, container_name):
-        if not self.container_exists(container_name):
-            logger.error(f"Container {container_name} does not exist")
-            raise PocException(f"Container {container_name} does not exist")
-        logger.info(f"Listing all blob names in {container_name}")
-        try:
-            container_client = self.storage_account_client.get_container_client(container_name)
-            logger.info(f"Checking for blobs in container:{container_name}")
-            blobs = container_client.list_blobs()
-            blob_with_filenames = [blob.name for blob in blobs]
-            blob_names = set([blob.split('/')[0] for blob in blob_with_filenames])
-            logger.info(f"Blob names in {container_name}: {blob_names}")
-            logger.info(f"Found {len(blob_names)} no of blobs in container:{container_name} ")
-            
-            # Log the number of folders in each blob
-            for blob_name in blob_names:
-                folder_count = sum(1 for blob in blob_with_filenames if blob.startswith(blob_name + '/'))
-                logger.info(f"Blob {blob_name} contains {folder_count} folders")
-            
-            return blob_names, blob_with_filenames
-        except Exception as e:
-            logger.error(f"Failed to list blobs in {container_name}: {e}")
-            raise PocException(f"Failed to list blobs in {container_name}", sys)
+   
 
     @log_execution_time
     def delete_files(self, container_name, blob_names):

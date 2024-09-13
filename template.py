@@ -16,9 +16,17 @@ list_of_files = [
     f"{package_name}/utils/__init__.py",
     f"{package_name}/components/__init__.py",
     f"{package_name}/components/training/dataingestion.py",
+    f"{package_name}/components/training/datatransformation.py",
+    # f"{package_name}/components/training/datacleaning.py",
     f"{package_name}/pipeline/__init__.py",
+    f"{package_name}/pipeline/training/__init__.py",
+    f"{package_name}/pipeline/prediction/__init__.py",
+    
     "requirements.txt",
-    "app.py"
+    "app.py",
+    ".gitignore"
+    "setup.py",
+    "tests.ipynb"
 ]
 
 for file_path in list_of_files:

@@ -24,4 +24,6 @@ pyaudio
 faster_whisper
 azure-storage-blob 
 azure-identity
+langchain_experimental
+pandas
 -e .
