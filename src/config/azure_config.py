@@ -239,45 +239,45 @@ class AzureBlobManager:
             logger.error(f"Failed to delete files from {container_name}: {e}")
             raise PocException(e) 
 
-def main():
-    parser = argparse.ArgumentParser(description="Azure Blob Storage Manager")
-    parser.add_argument("-c", "--connection_string", default=azure_storageaccount_cs, help="Azure Storage connection string")
-    parser.add_argument("-dac", "--download_allfiles_in_container", nargs=2, metavar=("container_name", "download_dir"), help="Download all files from a container")
-    parser.add_argument("-d", "--download_allfiles_in_blob", nargs=3, metavar=("container_name", "download_dir", "blob_name"), help="Download all files from a specific blob in a container ")
-    parser.add_argument("-u", "--upload_files", nargs=3, metavar=("container_name", "folder_path", "blob_name"), help="Upload files to a container")
-    parser.add_argument("-ls", "--list_blob_names_and_files", metavar="container_name", help="List all blob names and files in a container")
-    parser.add_argument("-del", "--delete_files", nargs=2, metavar=("container_name", "blob_names"), help="Delete files from a container")
+# def main():
+#     parser = argparse.ArgumentParser(description="Azure Blob Storage Manager")
+#     parser.add_argument("-c", "--connection_string", default=azure_storageaccount_cs, help="Azure Storage connection string")
+#     parser.add_argument("-dac", "--download_allfiles_in_container", nargs=2, metavar=("container_name", "download_dir"), help="Download all files from a container")
+#     parser.add_argument("-d", "--download_allfiles_in_blob", nargs=3, metavar=("container_name", "download_dir", "blob_name"), help="Download all files from a specific blob in a container ")
+#     parser.add_argument("-u", "--upload_files", nargs=3, metavar=("container_name", "folder_path", "blob_name"), help="Upload files to a container")
+#     parser.add_argument("-ls", "--list_blob_names_and_files", metavar="container_name", help="List all blob names and files in a container")
+#     parser.add_argument("-del", "--delete_files", nargs=2, metavar=("container_name", "blob_names"), help="Delete files from a container")
 
-    args = parser.parse_args()
+#     args = parser.parse_args()
 
-    try:
-        functionalities = AzureBlobManager(args.connection_string)
-        logger.info("Blob storage connection is successful")
-    except Exception as e:
-        logger.error(f"Failed to connect to Azure Blob Storage: {e}")
-        raise PocException("Failed to connect to Azure Blob Storage") from e
+#     try:
+#         functionalities = AzureBlobManager(args.connection_string)
+#         logger.info("Blob storage connection is successful")
+#     except Exception as e:
+#         logger.error(f"Failed to connect to Azure Blob Storage: {e}")
+#         raise PocException("Failed to connect to Azure Blob Storage") from e
 
-    if args.download_allfiles_in_container:
-        container_name, download_dir = args.download_allfiles_in_container
-        functionalities.download_allfiles_in_container(container_name, download_dir)
-    elif args.download_allfiles_in_blob:
-        container_name, download_dir, blob_name = args.download_allfiles_in_blob
-        functionalities.download_allfiles_in_blob(container_name, download_dir, blob_name)
-    elif args.upload_files:
-        container_name, folder_path, blob_name = args.upload_files
-        functionalities.upload_files(container_name, folder_path, blob_name)
-    elif args.list_blob_names_and_files:
-        container_name = args.list_blob_names_and_files
-        blob_names, blob_with_filenames = functionalities.list_blob_names_and_files(container_name)
-        print(f"Blob names: {blob_names}")
-        print(f"Blob names with files: {blob_with_filenames}")
-    elif args.delete_files:
-        container_name, blob_names = args.delete_files
-        blob_names = blob_names.split(",")  # Assuming blob names are comma-separated
-        functionalities.delete_files(container_name, blob_names)
+#     if args.download_allfiles_in_container:
+#         container_name, download_dir = args.download_allfiles_in_container
+#         functionalities.download_allfiles_in_container(container_name, download_dir)
+#     elif args.download_allfiles_in_blob:
+#         container_name, download_dir, blob_name = args.download_allfiles_in_blob
+#         functionalities.download_allfiles_in_blob(container_name, download_dir, blob_name)
+#     elif args.upload_files:
+#         container_name, folder_path, blob_name = args.upload_files
+#         functionalities.upload_files(container_name, folder_path, blob_name)
+#     elif args.list_blob_names_and_files:
+#         container_name = args.list_blob_names_and_files
+#         blob_names, blob_with_filenames = functionalities.list_blob_names_and_files(container_name)
+#         print(f"Blob names: {blob_names}")
+#         print(f"Blob names with files: {blob_with_filenames}")
+#     elif args.delete_files:
+#         container_name, blob_names = args.delete_files
+#         blob_names = blob_names.split(",")  # Assuming blob names are comma-separated
+#         functionalities.delete_files(container_name, blob_names)
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
 
 
 
