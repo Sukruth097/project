@@ -28,7 +28,6 @@ class DataIngestion:
             user_info = os.getlogin() 
             os.makedirs(os.path.dirname(self.data_ingestion_config.metadata_filename), exist_ok=True)
             # metadata_path=self.data_ingestion_config.metadata_filename
-            # Read existing metadata if it exists
             if os.path.exists(self.data_ingestion_config.metadata_filename):
                 existing_metadata = read_json_file(self.data_ingestion_config.metadata_filename)
                 existing_files = set(existing_metadata.get("filename", []))
@@ -45,7 +44,7 @@ class DataIngestion:
                 "timestamp": time.strftime("%Y-%m-%d %I:%M:%S %p", time.localtime()),
                 "container_name": azure_container_name,
                 "blob_name": azure_blob_name,
-                # "downloaded_files": os.listdir(raw_data_path) if len(os.listdir(raw_data_path))!=0 else "No files downloaded",
+                "downloaded_files": data_filenames,# os.listdir(raw_data_path) if len(os.listdir(raw_data_path))!=0 else "No files downloaded",
                 "filename": list(existing_files.union(data_filenames)),
                 "user_info": user_info
             }

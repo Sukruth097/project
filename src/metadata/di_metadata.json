@@ -1,12 +1,14 @@
 {
     "Context": "Metadata of Data Ingestion component which contains the data files downloaded list",
-    "timestamp": "2024-09-13 12:45:08 PM",
+    "timestamp": "2024-09-16 07:20:52 PM",
     "container_name": "testindex-chunks",
     "blob_name": "cracked-output",
-    "filename": [
-        "cracked-output/aHR0cHM6Ly9sbG04NjA5Njc5MDU0LmJsb2IuY29yZS53aW5kb3dzLm5ldC9maWxldXBsb2FkLXRlc3RpbmRleC9sZWJvMTExLnBkZg2.txt",
-        "cracked-output/jemh1a2.pdf",
+    "downloaded_files": [
         "cracked-output/jemh1a1.pdf"
+    ],
+    "filename": [
+        "cracked-output/jemh1a1.pdf",
+        "cracked-output/aHR0cHM6Ly9sbG04NjA5Njc5MDU0LmJsb2IuY29yZS53aW5kb3dzLm5ldC9maWxldXBsb2FkLXRlc3RpbmRleC9sZWJvMTExLnBkZg2.txt"
     ],
     "user_info": "v-sukruthav"
 }

@@ -1,4 +1,7 @@
 from langchain_community.llms import Ollama
+import os
+from PIL import Image
+import io
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from langchain_community.vectorstores import Chroma
@@ -25,3 +28,31 @@ FILE_LOADERS = {
 }
 
 ACCEPTED_FILE_TYPES = list(FILE_LOADERS)
+
+
+
+class ChatWithFile:
+    """
+    Main class to handle the interface with the LLM
+    """
+    def __init__(self, file_path, file_type):
+        """
+        Perform initial parsing of the uploaded file and initialize the
+        chat instance.
+
+        :param file_path: Full path and name of uploaded file
+        :param file_type: File extension determined
+        """
+        self.embedding_model = self.load_embedding_model()
+        self.vectordb = None
+        loader = FILE_LOADERS[file_type](file_path=file_path)
+        pages = loader.load_and_split()
+        docs = self.split_into_chunks(pages)
+        self.store_in_chroma(docs)
+
+        self.memory = ConversationBufferMemory(
+            memory_key="chat_history",
+            return_messages=True
+        )
+
+        self.llm = ""
