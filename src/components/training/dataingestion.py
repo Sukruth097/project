@@ -14,7 +14,7 @@ import time
 class DataIngestion:
     
     @log_execution_time
-    def __init__(self, data_ingestion_config:DataIngestionConfig,azure_blob_config):
+    def __init__(self, data_ingestion_config:DataIngestionConfig,azure_blob_config:AzureBlobManager):
         logger.info("******************* DATA_INGESTION COMPONENT STARTED *******************")
         self.data_ingestion_config=data_ingestion_config
         self.azure_blob_config = azure_blob_config
@@ -31,6 +31,7 @@ class DataIngestion:
             if os.path.exists(self.data_ingestion_config.metadata_filename):
                 existing_metadata = read_json_file(self.data_ingestion_config.metadata_filename)
                 existing_files = set(existing_metadata.get("filename", []))
+                print(existing_files)
             else:
                 existing_files = set()
             
@@ -52,7 +53,8 @@ class DataIngestion:
             # Write metadata to metadata.json
             metadata = write_json_file(self.data_ingestion_config.metadata_filename, metadata)
             logger.info(f"Metadata written to {self.data_ingestion_config.metadata_filename}")
-            return raw_data_path, metadata
+            print(raw_data_path, metadata)
+            # return raw_data_path, metadata
         except Exception as e:
             logger.error(e)
             PocException(e, sys)
@@ -76,8 +78,9 @@ if __name__ == "__main__":
     data_ingestion_config= DataIngestionConfig()
     azure_blob_config = AzureBlobManager()
     data_ingestion_component = DataIngestion(data_ingestion_config,azure_blob_config)
+    data_ingestion_component.download_azure_data()
     
-    downloaded_data_files,metadata=data_ingestion_component.download_azure_data()
+    # downloaded_data_files,metadata=data_ingestion_component.download_azure_data()
     # print(os.listdir(downloaded_data_files))
     # print(metadata)
     # a=read_json_file(metadata)
