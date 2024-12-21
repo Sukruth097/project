@@ -8,3 +8,5 @@ artifacts/*
 data
 data/*
 __pycache__/
+images
+images/*
