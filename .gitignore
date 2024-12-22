@@ -10,3 +10,5 @@ data/*
 __pycache__/
 images
 images/*
+pymupdf_lib_images
+pymupdf_lib_images/*
