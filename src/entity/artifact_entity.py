@@ -2,4 +2,5 @@ from dataclasses import dataclass
 
 @dataclass
 class DataIngestionArtifact:
-    processed_data_file_path :str
+    azure_raw_data :str
+    metadata_file_path :str

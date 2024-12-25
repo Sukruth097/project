@@ -36,8 +36,8 @@ class DataIngestion:
             # metadata_path=self.data_ingestion_config.metadata_filename
             if os.path.exists(self.data_ingestion_config.metadata_filename):
                 existing_metadata = read_json_file(self.data_ingestion_config.metadata_filename)
-                existing_files = set(existing_metadata.get("filenames", []))
-                print(existing_files)
+                existing_files = set(existing_metadata.get("filenames", [])).union(set(existing_metadata.get("rejected_files", [])))
+                # print(f"------->{existing_files}")
             else:
                 existing_files = set()
             
@@ -55,7 +55,6 @@ class DataIngestion:
                 "filenames": list(existing_files.union(data_filenames)),
                 "user_info": user_info
             }
-            
             # Write metadata to metadata.json
             metadata = write_json_file(self.data_ingestion_config.metadata_filename, metadata)
             logger.info(f"Metadata written to {self.data_ingestion_config.metadata_filename}")
@@ -77,12 +76,12 @@ class DataIngestion:
                 else:
                     file_type_count["rejected_files_count"]+=1
                     rejected_files.append(file)
+                    files.remove(file)
             file_metadata.update({
                 'file_type_count': file_type_count,
                 'rejected_files': rejected_files
             })
             write_json_file(metadata_filename, file_metadata)
-
         except Exception as e:
             PocException(e,sys)
     
@@ -100,20 +99,11 @@ if __name__ == "__main__":
     data_ingestion_config= DataIngestionConfig()
     azure_blob_config = AzureBlobManager()
     data_ingestion_component = DataIngestion(data_ingestion_config,azure_blob_config)
-    azure_raw_data,file_type_metadata=data_ingestion_component.trigger_data_ingestion()
-    print(azure_raw_data)
-    print(file_type_metadata)
+    azure_raw_data,metadata_file_path=data_ingestion_component.trigger_data_ingestion()
     # azure_raw_data,azure_di_metadata=data_ingestion_component.download_azure_data()
     # data_ingestion_component.di_files_metadata(azure_di_metadata)
-    # file_metadata = read_json_file(data_ingestion_config.metadata_filename)
-    # print(file_metadata.get('filenames'))
-    
-    
-    # downloaded_data_files,metadata=data_ingestion_component.download_azure_data()
-    # print(os.listdir(downloaded_data_files))
-    # print(metadata)
-    # a=read_json_file(metadata)
-    # print(di_filenames)
+    file_metadata = read_json_file(metadata_file_path)
+    print(file_metadata['filenames'])
     logger.info("******************* DATA_INGESTION COMPONENT COMPLETED *******************")
     
             
