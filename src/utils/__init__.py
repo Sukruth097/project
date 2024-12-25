@@ -88,3 +88,17 @@ def read_json_file(file_path: str) -> dict:
             return json.load(json_file)
     except Exception as e:
         raise PocException(e, sys)
+    
+    # def update_json_file(file_path: str, data: dict):
+    #     """
+    #     Update an existing JSON file with new data.
+    #     file_path: str
+    #     data: dict
+    #     """
+    #     try:
+    #         existing_data = read_json_file(file_path)
+    #         existing_data.update(data)
+    #         write_json_file(file_path, existing_data)
+    #         return file_path
+    #     except Exception as e:
+    #         raise PocException(e, sys)

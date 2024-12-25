@@ -13,6 +13,7 @@ from langchain_community.document_loaders import (
     Docx2txtLoader,
     UnstructuredExcelLoader,
 )
+from unstructured.partition.pdf import partition_pdf
 from langchain_experimental.text_splitter import SemanticChunker
 from src.logger import logger
 from src.exception import PocException
@@ -21,14 +22,18 @@ from src.utils import log_execution_time
 FILE_LOADERS = {
     "csv": CSVLoader,
     "docx": Docx2txtLoader,
-    "pdf": PyMuPDFLoader,
+    "pdf": partition_pdf,
     "pptx": UnstructuredPowerPointLoader,
     "txt": TextLoader,
     "xlsx": UnstructuredExcelLoader,
 }
 
-ACCEPTED_FILE_TYPES = list(FILE_LOADERS)
-
+def file_type_acceptance_list():
+    """
+    provide the list of accepted file types
+    """
+    accepted_file_list = list(FILE_LOADERS)
+    return accepted_file_list
 
 
 class ChatWithFile:

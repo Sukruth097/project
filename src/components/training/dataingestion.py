@@ -10,7 +10,12 @@ from src.config.constants import *
 from PyPDF2 import PdfMerger
 import time
 import socket
+from src.utils.data_helper import file_type_acceptance_list
 
+ACCEPTANCE_FILE_TYPES = file_type_acceptance_list()
+file_type_count = {file_type: 0 for file_type in ACCEPTANCE_FILE_TYPES}
+file_type_count["rejected_files_count"] = 0
+rejected_files=[]
 
 class DataIngestion:
     
@@ -46,8 +51,8 @@ class DataIngestion:
                 "timestamp": time.strftime("%Y-%m-%d %I:%M:%S %p", time.localtime()),
                 "container_name": azure_container_name,
                 "blob_name": azure_blob_name,
-                "downloaded_files": data_filenames,# os.listdir(raw_data_path) if len(os.listdir(raw_data_path))!=0 else "No files downloaded",
-                "filename": list(existing_files.union(data_filenames)),
+                "new_downloaded_files": data_filenames,# os.listdir(raw_data_path) if len(os.listdir(raw_data_path))!=0 else "No files downloaded",
+                "filenames": list(existing_files.union(data_filenames)),
                 "user_info": user_info
             }
             
@@ -55,15 +60,29 @@ class DataIngestion:
             metadata = write_json_file(self.data_ingestion_config.metadata_filename, metadata)
             logger.info(f"Metadata written to {self.data_ingestion_config.metadata_filename}")
             print(raw_data_path, metadata)
-            # return raw_data_path, metadata
+            return raw_data_path, metadata
         except Exception as e:
             logger.error(e)
             PocException(e, sys)
         
     @log_execution_time
-    def capture_di_metadata(self):
+    def di_files_metadata(self,metadata_filename):
         try:
-            pass
+            file_metadata = read_json_file(metadata_filename)
+            files=file_metadata.get('filenames')
+            for file in files:
+                file_type=file.split('.')[-1]
+                if file_type in ACCEPTANCE_FILE_TYPES:
+                    file_type_count[f"{file_type}"]+=1
+                else:
+                    file_type_count["rejected_files_count"]+=1
+                    rejected_files.append(file)
+            file_metadata.update({
+                'file_type_count': file_type_count,
+                'rejected_files': rejected_files
+            })
+            write_json_file(metadata_filename, file_metadata)
+
         except Exception as e:
             PocException(e,sys)
     
@@ -79,7 +98,10 @@ if __name__ == "__main__":
     data_ingestion_config= DataIngestionConfig()
     azure_blob_config = AzureBlobManager()
     data_ingestion_component = DataIngestion(data_ingestion_config,azure_blob_config)
-    data_ingestion_component.download_azure_data()
+    azure_raw_data,azure_di_metadata=data_ingestion_component.download_azure_data()
+    data_ingestion_component.di_files_metadata(azure_di_metadata)
+    # file_metadata = read_json_file(data_ingestion_config.metadata_filename)
+    # print(file_metadata.get('filenames'))
     
     
     # downloaded_data_files,metadata=data_ingestion_component.download_azure_data()
