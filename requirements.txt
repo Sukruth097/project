@@ -26,5 +26,8 @@ azure-storage-blob
 azure-identity
 langchain_experimental
 pandas
-# pymupdf
+unstructured[all-docs]
+PyMuPDF
+matplotlib
+seaborn
 -e .
