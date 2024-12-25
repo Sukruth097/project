@@ -9,6 +9,7 @@ from src.config.azure_config import AzureBlobManager
 from src.config.constants import *
 from PyPDF2 import PdfMerger
 import time
+import socket
 
 
 class DataIngestion:
@@ -25,7 +26,7 @@ class DataIngestion:
             download_dir = self.data_ingestion_config.raw_data_dir
             azure_container_name = self.data_ingestion_config.azure_container_name
             azure_blob_name = self.data_ingestion_config.azure_blob_name
-            user_info = os.getlogin() 
+            user_info = socket.gethostname() #os.getlogin() 
             os.makedirs(os.path.dirname(self.data_ingestion_config.metadata_filename), exist_ok=True)
             # metadata_path=self.data_ingestion_config.metadata_filename
             if os.path.exists(self.data_ingestion_config.metadata_filename):
