@@ -20,7 +20,7 @@ faiss-cpu
 audio-recorder-streamlit==0.0.8
 weaviate-client
 pypdf
-pyaudio
+# pyaudio
 faster_whisper
 azure-storage-blob 
 azure-identity

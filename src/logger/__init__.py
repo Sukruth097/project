@@ -4,6 +4,7 @@ from datetime import datetime
 from src.config.constants import *
 import re
 from src.config.mongo_db_config import MongodbClient
+import socket
 
 # Custom formatter class
 class CustomFormatter(logging.Formatter):
@@ -11,7 +12,7 @@ class CustomFormatter(logging.Formatter):
         return datetime.fromtimestamp(record.created).strftime('%Y-%m-%d %I:%M:%S %p')
 
     def format(self, record):
-        record.user = os.getlogin()
+        record.user = socket.gethostname() #os.getlogin()
         return super().format(record)
 
 # Function to get log file name

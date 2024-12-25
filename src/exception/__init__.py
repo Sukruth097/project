@@ -4,6 +4,7 @@ import time
 from src.config.mongo_db_config import MongodbClient
 from src.config.constants import *
 from src.logger import logger
+import socket
 # logger = get_logger("POC")
 
 class PocException(Exception):
@@ -26,7 +27,7 @@ class PocException(Exception):
         filename = exc_tb.tb_frame.f_code.co_filename
         line_no = exc_tb.tb_lineno
         timestamp = time.strftime("%Y-%m-%d %I:%M:%S %p", time.localtime())
-        user = os.getlogin()
+        user = socket.gethostname() #os.getlogin()
 
         client = MongodbClient(database_name=DATABASE_NAME,collection_name=ERROR_COLLECTION_NAME,)
         
