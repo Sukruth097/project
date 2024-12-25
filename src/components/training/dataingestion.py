@@ -80,6 +80,7 @@ if __name__ == "__main__":
     data_ingestion_component = DataIngestion(data_ingestion_config,azure_blob_config)
     data_ingestion_component.download_azure_data()
     
+    
     # downloaded_data_files,metadata=data_ingestion_component.download_azure_data()
     # print(os.listdir(downloaded_data_files))
     # print(metadata)
