@@ -36,7 +36,7 @@ class DataIngestion:
             # metadata_path=self.data_ingestion_config.metadata_filename
             if os.path.exists(self.data_ingestion_config.metadata_filename):
                 existing_metadata = read_json_file(self.data_ingestion_config.metadata_filename)
-                existing_files = set(existing_metadata.get("filename", []))
+                existing_files = set(existing_metadata.get("filenames", []))
                 print(existing_files)
             else:
                 existing_files = set()
@@ -90,6 +90,8 @@ class DataIngestion:
     def trigger_data_ingestion(self):
         try:
             azure_raw_data,azure_di_metadata = self.download_azure_data()
+            self.di_files_metadata(azure_di_metadata)
+            return azure_raw_data,azure_di_metadata
         except Exception as e:
             PocException(e,sys)
             
@@ -98,8 +100,11 @@ if __name__ == "__main__":
     data_ingestion_config= DataIngestionConfig()
     azure_blob_config = AzureBlobManager()
     data_ingestion_component = DataIngestion(data_ingestion_config,azure_blob_config)
-    azure_raw_data,azure_di_metadata=data_ingestion_component.download_azure_data()
-    data_ingestion_component.di_files_metadata(azure_di_metadata)
+    azure_raw_data,file_type_metadata=data_ingestion_component.trigger_data_ingestion()
+    print(azure_raw_data)
+    print(file_type_metadata)
+    # azure_raw_data,azure_di_metadata=data_ingestion_component.download_azure_data()
+    # data_ingestion_component.di_files_metadata(azure_di_metadata)
     # file_metadata = read_json_file(data_ingestion_config.metadata_filename)
     # print(file_metadata.get('filenames'))
     
