@@ -7,7 +7,8 @@ from src.entity.artifact_entity import DataIngestionArtifact
 from src.utils import log_execution_time,write_json_file,read_json_file
 from src.config.azure_config import AzureBlobManager
 from src.config.constants import *
-from PyPDF2 import PdfMerger
+from PyPDF2 import PdfReader
+# from PyPDF2 import PdfMerger
 import time
 import socket
 from src.utils.data_helper import file_type_acceptance_list
@@ -36,7 +37,8 @@ class DataIngestion:
             # metadata_path=self.data_ingestion_config.metadata_filename
             if os.path.exists(self.data_ingestion_config.metadata_filename):
                 existing_metadata = read_json_file(self.data_ingestion_config.metadata_filename)
-                existing_files = set(existing_metadata.get("filenames", [])).union(set(existing_metadata.get("rejected_files", [])))
+                # existing_files = set(existing_metadata.get("filenames", [])).union(set(existing_metadata.get("rejected_files", [])))
+                existing_files = set(existing_metadata.get("rejected_files", []))
                 # print(f"------->{existing_files}")
             else:
                 existing_files = set()
@@ -55,13 +57,13 @@ class DataIngestion:
                 "filenames": list(existing_files.union(data_filenames)),
                 "user_info": user_info
             }
-            # Write metadata to metadata.json
+          
             metadata = write_json_file(self.data_ingestion_config.metadata_filename, metadata)
             logger.info(f"Metadata written to {self.data_ingestion_config.metadata_filename}")
-            print(raw_data_path, metadata)
+            # print(raw_data_path, metadata)
             return raw_data_path, metadata
         except Exception as e:
-            logger.error(e)
+            print(logger.error(e))
             PocException(e, sys)
         
     @log_execution_time
@@ -83,6 +85,7 @@ class DataIngestion:
             })
             write_json_file(metadata_filename, file_metadata)
         except Exception as e:
+            print(logger.error(e))
             PocException(e,sys)
     
     @log_execution_time
@@ -90,8 +93,11 @@ class DataIngestion:
         try:
             azure_raw_data,azure_di_metadata = self.download_azure_data()
             self.di_files_metadata(azure_di_metadata)
-            return azure_raw_data,azure_di_metadata
+            blob_raw_data = os.path.join(os.getcwd(),azure_raw_data)
+            data_ingestion_artifact = DataIngestionArtifact(blob_raw_data,azure_di_metadata)
+            return data_ingestion_artifact
         except Exception as e:
+            print(logger.error(e))
             PocException(e,sys)
             
             
@@ -99,11 +105,21 @@ if __name__ == "__main__":
     data_ingestion_config= DataIngestionConfig()
     azure_blob_config = AzureBlobManager()
     data_ingestion_component = DataIngestion(data_ingestion_config,azure_blob_config)
-    azure_raw_data,metadata_file_path=data_ingestion_component.trigger_data_ingestion()
+    data_ingestion_artifact=data_ingestion_component.trigger_data_ingestion()
+    # print(f"-------->{data_ingestion_artifact.azure_raw_data}")
+    # print(data_ingestion_artifact.metadata_file_path)
+    # print(f"---->{os.listdir(data_ingestion_artifact.azure_raw_data)}")
+
+    # for file in os.listdir(data_path):
+    #     if file.endswith('.pdf'):
+    #         file_path = os.path.join(data_path, file)
+    #         with open(file_path, 'rb') as file:
+    #             pdf_reader = PdfReader(file)
+    #             print(f"Number of pages in {file_path} is {len(pdf_reader.pages)}")   
     # azure_raw_data,azure_di_metadata=data_ingestion_component.download_azure_data()
     # data_ingestion_component.di_files_metadata(azure_di_metadata)
-    file_metadata = read_json_file(metadata_file_path)
-    print(file_metadata['filenames'])
+    # file_metadata = read_json_file(data_ingestion_artifact.metadata_file_path)
+    # print(file_metadata['filenames'])
     logger.info("******************* DATA_INGESTION COMPONENT COMPLETED *******************")
     
             
