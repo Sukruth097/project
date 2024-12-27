@@ -134,7 +134,7 @@ class PDFFileHanlder:
             raise PocException(e, sys)
 
 if __name__ == "__main__":
-    print(f"-------->{os.getcwd()}")
+    # print(f"-------->{os.getcwd()}")
     path = os.path.join(os.getcwd(), "artifacts/12_25_2024_17_00_49/DataIngestion/rawdata/cracked-output")
 
     pdf_file_handler = PDFFileHanlder(output_dir=path)
@@ -142,4 +142,4 @@ if __name__ == "__main__":
     print(all_text)
     print(all_images)
     print(all_table)
-    print(f"-------->{os.getcwd()}")
+    # print(f"-------->{os.getcwd()}")
