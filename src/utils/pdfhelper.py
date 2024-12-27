@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
     pdf_file_handler = PDFFileHanlder(output_dir=path)
     all_text, all_images,all_table = pdf_file_handler.run_pdf_processing()
-    print(all_text)
-    print(all_images)
-    print(all_table)
+    # print(all_text)
+    # print(all_images)
+    # print(all_table)
     # print(f"-------->{os.getcwd()}")
