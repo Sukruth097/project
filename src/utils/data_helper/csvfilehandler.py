@@ -7,6 +7,8 @@ import sys
 from src.exception import PocException
 from src.utils import log_execution_time
 from src.logger import logger
+import pandas as pd
+
 os.makedirs(os.path.join(os.getcwd(), "images"), exist_ok=True)
 
 class CSVFileHandler:
