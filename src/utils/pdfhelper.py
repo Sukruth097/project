@@ -1,6 +1,6 @@
 import os
-import uuid
-import base64
+# import uuid
+# import base64
 # from IPython import display
 from unstructured.partition.pdf import partition_pdf
 from unstructured.documents.elements import Table, Image, NarrativeText
