@@ -7,17 +7,29 @@ import sys
 import os
 from typing import List
 import shutil
+import asyncio
 
 def log_execution_time(func):
-    def wrapper(*args, **kwargs):
-        start_time = time.time()
-        result = func(*args, **kwargs)
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        minutes, seconds = divmod(elapsed_time, 60)
-        logger.info(f"Execution time for {func.__name__}: {int(minutes)} min {seconds:.3f} sec")
-        return result
-    return wrapper
+    if asyncio.iscoroutinefunction(func):
+        async def async_wrapper(*args, **kwargs):
+            start_time = time.time()
+            result = await func(*args, **kwargs)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            minutes, seconds = divmod(elapsed_time, 60)
+            logger.info(f"Execution time for {func.__name__}: {int(minutes)} min {seconds:.3f} sec")
+            return result
+        return async_wrapper
+    else:
+        def sync_wrapper(*args, **kwargs):
+            start_time = time.time()
+            result = func(*args, **kwargs)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            minutes, seconds = divmod(elapsed_time, 60)
+            logger.info(f"Execution time for {func.__name__}: {int(minutes)} min {seconds:.3f} sec")
+            return result
+        return sync_wrapper
 
 def write_yaml_file(file_path: str, data: dict = None):
     """
