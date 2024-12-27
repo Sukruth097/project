@@ -16,10 +16,12 @@ Cython
 tiktoken
 langchain-astradb
 langchain-openai
+groq
 faiss-cpu
 audio-recorder-streamlit==0.0.8
 weaviate-client
 pypdf
+google-generativeai
 # pyaudio
 faster_whisper
 azure-storage-blob 

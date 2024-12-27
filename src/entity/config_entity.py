@@ -3,8 +3,8 @@ from datetime import datetime
 from src.config.constants import *
 import os
 
-DataIngestionArtifact = namedtuple("DataIngestionArtifact",
-                                   ["feature_store_file_path", "metadata_file_path", "download_dir"])
+# DataIngestionArtifact = namedtuple("DataIngestionArtifact",
+#                                    ["feature_store_file_path", "metadata_file_path", "download_dir"])
 
 class TrainingDataConfig:
 
