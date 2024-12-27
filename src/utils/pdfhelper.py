@@ -142,3 +142,4 @@ if __name__ == "__main__":
     print(all_text)
     print(all_images)
     print(all_table)
+    print(f"-------->{os.getcwd()}")
