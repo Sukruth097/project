@@ -1,7 +1,4 @@
 import os
-# import uuid
-# import base64
-# from IPython import display
 from unstructured.partition.pdf import partition_pdf
 from unstructured.documents.elements import Table, Image, NarrativeText
 from src.config.constants import *
@@ -63,10 +60,10 @@ class PDFFileHanlder:
                     image_page_number = element.metadata.page_number
                     image_path = element.metadata.image_path if hasattr(element.metadata, 'image_path') else None
 
-                images_elements.append({
-                    "page_number": image_page_number,
-                    "image_path": image_path
-                })
+                    images_elements.append({
+                        "page_number": image_page_number,
+                        "image_path": image_path
+                    })
             return images_elements
         except Exception as e:
             print(e)
