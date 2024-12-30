@@ -11,7 +11,7 @@ class LLMs:
         self.gemini_pro_key = gemini_pro_key
         self.grog_llama_key = grog_llama_key
 
-    def azure_openai(self, search_indexes):
+    def azure_openai(self):
         
         client = AzureOpenAI(
             api_key=os.getenv("AZURE_OPENAI_API_KEY"),  
@@ -27,7 +27,7 @@ class LLMs:
         ]
         )
 
-        return response.choices[0].message.strip()
+        return response.choices[0].message.content
 
     def gemini_pro(self, search_indexes):
         

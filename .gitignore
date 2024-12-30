@@ -12,3 +12,5 @@ images
 images/*
 pymupdf_lib_images
 pymupdf_lib_images/*
+mlruns
+mlruns/*

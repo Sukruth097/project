@@ -7,13 +7,15 @@ import sys
 from src.exception import PocException
 from src.utils import log_execution_time
 from src.logger import logger
+from tqdm.asyncio import tqdm_asyncio
+
 os.makedirs(os.path.join(os.getcwd(), "images"), exist_ok=True)
 
 class PDFFileHandler:
 
     def __init__(self, output_dir):
         self.data_folder = output_dir
-        self.files = [file for file in os.listdir(self.data_folder) if file.lower().endswith('.pdf')]
+        self.files = [file for file in os.listdir(self.data_folder) if file.endswith(".pdf")]
         logger.info(f"Initialized PDFFileHandler with {len(self.files)} PDF files: {self.files}")
     
     @log_execution_time
@@ -115,7 +117,7 @@ class PDFFileHandler:
 
             for file in self.files:
                 tasks.append(process_with_semaphore(file))
-            results = await asyncio.gather(*tasks)
+            results = await tqdm_asyncio.gather(*tasks, desc="Processing PDFs")
             for text_elements, image_elements, table_elements in results:
                 all_text.extend(text_elements)
                 all_images.extend(image_elements)
@@ -154,16 +156,6 @@ if __name__ == "__main__":
 
     pdf_file_handler = PDFFileHandler(output_dir=path)
     all_text, all_images, all_table = asyncio.run(pdf_file_handler.run_pdf_processing())
-    print(all_text)
-    print(all_images)
-    print(all_table)
-
-
-        
-
-        
-
-       
-        
-
-        
+    print(all_text[0])
+    # print(all_images)
+    # print(all_table)

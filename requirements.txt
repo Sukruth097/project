@@ -30,6 +30,8 @@ langchain_experimental
 pandas
 unstructured[all-docs]
 PyMuPDF
+dagshub
 matplotlib
 seaborn
+mlflow
 -e .

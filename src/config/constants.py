@@ -18,3 +18,14 @@ DATA_INGESTION_PROCESSED_DATA_FILENAME ="processed_data.pdf"
 DATA_INGESTION_METADATA_DIR="metadata"
 DATA_INGESTION_METADATA_FILENAME="di_metadata.json"
 
+### Data Transformation Constants
+DATA_TRANSFORMATION_ARTIFACT_DIR = 'DataTransformation'
+DATA_TRANSFORMATION_DATA_DIR = 'data'
+for file_type in ['pdf', 'csv', 'pptx', 'docx', 'text']:
+    # globals()[f'DATA_TRANSFORMATION_{file_type.upper()}_DIR'] = file_type
+    globals()[f'DATA_TRANSFORMATION_{file_type.upper()}_TEXT_FILENAME'] = f'{file_type}_text.json'
+    globals()[f'DATA_TRANSFORMATION_{file_type.upper()}_IMAGE_FILENAME'] = f'{file_type}_image.json'
+    globals()[f'DATA_TRANSFORMATION_{file_type.upper()}_TABLE_FILENAME'] = f'{file_type}_table.json'
+
+
+

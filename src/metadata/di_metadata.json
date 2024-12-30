@@ -1,6 +1,6 @@
 {
     "Context": "Metadata of Data Ingestion component which contains the data files downloaded list",
-    "timestamp": "2024-12-25 05:00:54 PM",
+    "timestamp": "2024-12-30 12:35:05 PM",
     "container_name": "testindex-chunks",
     "blob_name": "cracked-output",
     "new_downloaded_files": [
@@ -11,20 +11,20 @@
     "filenames": [
         "cracked-output/aHR0cHM6Ly9sbG04NjA5Njc5MDU0LmJsb2IuY29yZS53aW5kb3dzLm5ldC9maWxldXBsb2FkLXRlc3RpbmRleC9sZWJvMTExLnBkZg2.txt",
         "cracked-output/jemh1a1.pdf",
-        "cracked-output/OnlineSvcsConsolidatedSLA(WW)(English)(December2024)(CR).docx"
+        "cracked-output/OnlineSvcsConsolidatedSLA(WW)(English)(December2024)(CR).docx",
+        "cracked-output/download.jpg"
     ],
     "user_info": "v-sukruthav1",
     "file_type_count": {
         "csv": 0,
         "docx": 1,
-        "pdf": 0,
+        "pdf": 1,
         "pptx": 0,
         "txt": 1,
         "xlsx": 0,
-        "rejected_files_count": 2
+        "rejected_files_count": 1
     },
     "rejected_files": [
-        "cracked-output/documentintelligence.ai.azure.com.har",
-        "cracked-output/download.jpg"
+        "cracked-output/documentintelligence.ai.azure.com.har"
     ]
 }

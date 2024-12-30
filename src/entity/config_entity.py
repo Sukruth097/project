@@ -23,3 +23,10 @@ class DataIngestionConfig():
         self.processed_data_filename = DATA_INGESTION_PROCESSED_DATA_FILENAME
         self.azure_container_name = CONTAINER_NAME
         self.azure_blob_name = BLOB_NAME
+
+class DataTransformationConfig():
+
+    def __init__(self):
+        self.data_transformation_dir = os.path.join(ARTIFACT_DIR,DATA_TRANSFORMATION_ARTIFACT_DIR)
+        self.data_dir = os.path.join(self.data_transformation_dir,DATA_TRANSFORMATION_DATA_DIR)
+        self.pdf_text_filename = os.path.join(self.data_dir,DATA_TRANSFORMATION_PDF_TEXT_FILENAME) # type: ignore
