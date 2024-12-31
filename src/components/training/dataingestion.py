@@ -17,14 +17,14 @@ import dagshub
 dagshub.init(repo_owner='sukruthav007',repo_name='project',mlflow=True)
 mlflow.set_experiment("LLM-Education-POC")
 
-ACCEPTANCE_FILE_TYPES = file_type_acceptance_list()
-file_type_count = {file_type: 0 for file_type in ACCEPTANCE_FILE_TYPES}
-file_type_count["rejected_files_count"] = 0
-rejected_files = []
+# ACCEPTANCE_FILE_TYPES = file_type_acceptance_list()
+# file_type_count = {file_type: 0 for file_type in ACCEPTANCE_FILE_TYPES}
+# file_type_count["rejected_files_count"] = 0
+# rejected_files = []
 
 class DataIngestion:
     
-    @log_execution_time
+    # @log_execution_time
     def __init__(self, data_ingestion_config: DataIngestionConfig, azure_blob_config: AzureBlobManager):
         logger.info("******************* DATA_INGESTION COMPONENT STARTED *******************")
         self.data_ingestion_config = data_ingestion_config
@@ -66,34 +66,34 @@ class DataIngestion:
             logger.error(e)
             raise PocException(e, sys)
         
-    @log_execution_time
-    def di_files_metadata(self, metadata_filename):
-        try:
-            file_metadata = read_json_file(metadata_filename)
-            files = file_metadata.get('filenames')
-            for file in files:
-                file_type = file.split('.')[-1]
-                if file_type in ACCEPTANCE_FILE_TYPES:
-                    file_type_count[f"{file_type}"] += 1
-                else:
-                    file_type_count["rejected_files_count"] += 1
-                    rejected_files.append(file)
-                    files.remove(file)
-            file_metadata.update({
-                'file_type_count': file_type_count,
-                'rejected_files': rejected_files
-            })
-            write_json_file(metadata_filename, file_metadata)
-        except Exception as e:
-            logger.error(e)
-            raise PocException(e, sys)
+    # @log_execution_time
+    # def di_files_metadata(self, metadata_filename):
+    #     try:
+    #         file_metadata = read_json_file(metadata_filename)
+    #         files = file_metadata.get('filenames')
+    #         for file in files:
+    #             file_type = file.split('.')[-1]
+    #             if file_type in ACCEPTANCE_FILE_TYPES:
+    #                 file_type_count[f"{file_type}"] += 1
+    #             else:
+    #                 file_type_count["rejected_files_count"] += 1
+    #                 rejected_files.append(file)
+    #                 # files.remove(file)
+    #         file_metadata.update({
+    #             'file_type_count': file_type_count,
+    #             'rejected_files': rejected_files
+    #         })
+    #         write_json_file(metadata_filename, file_metadata)
+    #     except Exception as e:
+    #         logger.error(e)
+    #         raise PocException(e, sys)
     
     @log_execution_time
     def trigger_data_ingestion(self):
         try:
             with mlflow.start_run(run_name="Data Ingestion"):
                 azure_raw_data, azure_di_metadata = self.download_azure_data()
-                self.di_files_metadata(azure_di_metadata)
+                # self.di_files_metadata(azure_di_metadata)
                 blob_raw_data = os.path.join(os.getcwd(), azure_raw_data)
                 data_ingestion_artifact = DataIngestionArtifact(blob_raw_data, azure_di_metadata)
                 

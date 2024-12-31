@@ -1,30 +1,20 @@
 {
     "Context": "Metadata of Data Ingestion component which contains the data files downloaded list",
-    "timestamp": "2024-12-30 12:35:05 PM",
+    "timestamp": "2024-12-31 03:17:12 PM",
     "container_name": "testindex-chunks",
     "blob_name": "cracked-output",
     "new_downloaded_files": [
         "cracked-output/OnlineSvcsConsolidatedSLA(WW)(English)(December2024)(CR).docx",
         "cracked-output/aHR0cHM6Ly9sbG04NjA5Njc5MDU0LmJsb2IuY29yZS53aW5kb3dzLm5ldC9maWxldXBsb2FkLXRlc3RpbmRleC9sZWJvMTExLnBkZg2.txt",
+        "cracked-output/documentintelligence.ai.azure.com.har",
         "cracked-output/jemh1a1.pdf"
     ],
     "filenames": [
-        "cracked-output/aHR0cHM6Ly9sbG04NjA5Njc5MDU0LmJsb2IuY29yZS53aW5kb3dzLm5ldC9maWxldXBsb2FkLXRlc3RpbmRleC9sZWJvMTExLnBkZg2.txt",
-        "cracked-output/jemh1a1.pdf",
+        "cracked-output/download.jpg",
         "cracked-output/OnlineSvcsConsolidatedSLA(WW)(English)(December2024)(CR).docx",
-        "cracked-output/download.jpg"
+        "cracked-output/jemh1a1.pdf",
+        "cracked-output/documentintelligence.ai.azure.com.har",
+        "cracked-output/aHR0cHM6Ly9sbG04NjA5Njc5MDU0LmJsb2IuY29yZS53aW5kb3dzLm5ldC9maWxldXBsb2FkLXRlc3RpbmRleC9sZWJvMTExLnBkZg2.txt"
     ],
-    "user_info": "v-sukruthav1",
-    "file_type_count": {
-        "csv": 0,
-        "docx": 1,
-        "pdf": 1,
-        "pptx": 0,
-        "txt": 1,
-        "xlsx": 0,
-        "rejected_files_count": 1
-    },
-    "rejected_files": [
-        "cracked-output/documentintelligence.ai.azure.com.har"
-    ]
+    "user_info": "v-sukruthav1"
 }
