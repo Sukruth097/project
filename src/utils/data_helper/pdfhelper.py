@@ -151,11 +151,11 @@ class PDFFileHandler:
             raise PocException(e, sys)
 
 
-if __name__ == "__main__":
-    path = os.path.join(os.getcwd(), "artifacts/12_25_2024_17_00_49/DataIngestion/rawdata/cracked-output")
+# if __name__ == "__main__":
+#     path = os.path.join(os.getcwd(), "artifacts/12_25_2024_17_00_49/DataIngestion/rawdata/cracked-output")
 
-    pdf_file_handler = PDFFileHandler(output_dir=path)
-    all_text, all_images, all_table = asyncio.run(pdf_file_handler.run_pdf_processing())
-    print(all_text[0])
+#     pdf_file_handler = PDFFileHandler(output_dir=path)
+#     all_text, all_images, all_table = asyncio.run(pdf_file_handler.run_pdf_processing())
+#     print(all_text[0])
     # print(all_images)
     # print(all_table)

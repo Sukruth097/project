@@ -1,0 +1,20 @@
+{
+    "Context": "Metadata of Data Transformation component which contains the accepted and rejected data files list",
+    "timestamp": "2024-12-31 05:41:11 PM",
+    "user_info": "v-sukruthav1",
+    "filenames": [
+        "aHR0cHM6Ly9sbG04NjA5Njc5MDU0LmJsb2IuY29yZS53aW5kb3dzLm5ldC9maWxldXBsb2FkLXRlc3RpbmRleC9sZWJvMTExLnBkZg2.txt",
+        "jemh1a1.pdf",
+        "OnlineSvcsConsolidatedSLA(WW)(English)(December2024)(CR).docx"
+    ],
+    "file_type_count": {
+        "csv": 0,
+        "docx": 1,
+        "pdf": 1,
+        "pptx": 0,
+        "txt": 1,
+        "xlsx": 0,
+        "rejected_files_count": 0
+    },
+    "rejected_files": []
+}
