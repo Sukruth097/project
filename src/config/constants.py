@@ -13,6 +13,10 @@ ERROR_COLLECTION_NAME="poc_error_logs"
 CONTAINER_NAME="testindex-chunks"
 BLOB_NAME="cracked-output"
 AZURE_AUTH_TYPE = os.getenv("AZURE_AUTH_TYPE", "keys")
+AZURE_OPENAI_DEPLOYMENT_NAME= "llm-gpt-4o"
+AZURE_OPENAI_MAXTOKENS = 2046
+AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME = "embedding_03large_model"  
+AZURE_OPENAI_TEMPERATURE= 0
 # def is_auth_type_keys():
 #         return AZURE_AUTH_TYPE == "keys"
 AZURE_TOKEN_PROVIDER = get_bearer_token_provider(

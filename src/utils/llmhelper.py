@@ -2,8 +2,6 @@ from openai import AzureOpenAI
 import google.generativeai as genai
 import os
 from groq import Groq
-from langchain_openai import AzureChatOpenAI
-from langchain_openai import AzureOpenAIEmbeddings
 from src.config.constants import *
 from dotenv import load_dotenv
 
@@ -11,136 +9,53 @@ load_dotenv()
 
 class LLMHelper:
     def __init__(self):
-        # self.env_helper: EnvHelper = EnvHelper()
-        self.auth_type_keys = self.env_helper.is_auth_type_keys()
-        self.token_provider = self.env_helper.AZURE_TOKEN_PROVIDER
+        self.auth_type_keys = AZURE_AUTH_TYPE
+        self.token_provider = AZURE_TOKEN_PROVIDER
 
         if self.auth_type_keys:
             self.openai_client = AzureOpenAI(
-                azure_endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
-                api_version=self.env_helper.AZURE_OPENAI_API_VERSION,
-                api_key=self.env_helper.OPENAI_API_KEY,
+                azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+                api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-08-01-preview"),
+                api_key=os.getenv("AZURE_OPENAI_API_KEY")
             )
         else:
             self.openai_client = AzureOpenAI(
-                azure_endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
-                api_version=self.env_helper.AZURE_OPENAI_API_VERSION,
+                azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+                api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-08-01-preview"),
                 azure_ad_token_provider=self.token_provider,
             )
 
-        self.llm_model = self.env_helper.AZURE_OPENAI_MODEL
-        self.llm_max_tokens = (
-            int(self.env_helper.AZURE_OPENAI_MAX_TOKENS)
-            if self.env_helper.AZURE_OPENAI_MAX_TOKENS != ""
-            else None
+        # self.genai_client = genai.Client(api_key=os.getenv("GENAI_API_KEY"))
+        # self.groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+    def get_openai_llm(self, messages):
+        completion = self.openai_client.chat.completions.create(
+            model=AZURE_OPENAI_DEPLOYMENT_NAME,
+            temperature=AZURE_OPENAI_TEMPERATURE,
+            max_tokens=AZURE_OPENAI_MAXTOKENS,
+            messages=messages
         )
-        self.embedding_model = self.env_helper.AZURE_OPENAI_EMBEDDING_MODEL
+        return completion
 
-    def get_llm(self):
-        if self.auth_type_keys:
-            return AzureChatOpenAI(
-                deployment_name=self.llm_model,
-                temperature=0,
-                max_tokens=self.llm_max_tokens,
-                openai_api_version=self.openai_client._api_version,
-                azure_endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
-                api_key=self.env_helper.OPENAI_API_KEY,
-            )
-        else:
-            return AzureChatOpenAI(
-                deployment_name=self.llm_model,
-                temperature=0,
-                max_tokens=self.llm_max_tokens,
-                openai_api_version=self.openai_client._api_version,
-                azure_endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
-                azure_ad_token_provider=self.token_provider,
-            )
-
-    # TODO: This needs to have a custom callback to stream back to the UI
-    def get_streaming_llm(self):
-        if self.auth_type_keys:
-            return AzureChatOpenAI(
-                azure_endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
-                api_key=self.env_helper.OPENAI_API_KEY,
-                streaming=True,
-                # callbacks=[StreamingStdOutCallbackHandler],
-                deployment_name=self.llm_model,
-                temperature=0,
-                max_tokens=self.llm_max_tokens,
-                openai_api_version=self.openai_client._api_version,
-            )
-        else:
-            return AzureChatOpenAI(
-                azure_endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
-                api_key=self.env_helper.OPENAI_API_KEY,
-                streaming=True,
-                # callbacks=[StreamingStdOutCallbackHandler],
-                deployment_name=self.llm_model,
-                temperature=0,
-                max_tokens=self.llm_max_tokens,
-                openai_api_version=self.openai_client._api_version,
-                azure_ad_token_provider=self.token_provider,
-            )
-
-    def get_embedding_model(self):
-        if self.auth_type_keys:
-            return AzureOpenAIEmbeddings(
-                azure_endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
-                api_key=self.env_helper.OPENAI_API_KEY,
-                azure_deployment=self.embedding_model,
-                chunk_size=1,
-            )
-        else:
-            return AzureOpenAIEmbeddings(
-                azure_endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
-                azure_deployment=self.embedding_model,
-                chunk_size=1,
-                azure_ad_token_provider=self.token_provider,
-            )
-
-    def generate_embeddings(self, input: Union[str, list[int]]) -> List[float]:
-        return (
-            self.openai_client.embeddings.create(
-                input=[input], model=self.embedding_model
-            )
-            .data[0]
-            .embedding
+    def generate_openai_embeddings(self, data):
+        embedding = self.openai_client.embeddings.create(
+            model=AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME,
+            input=data
         )
+        return embedding.data[0].embedding
 
-    def get_chat_completion_with_functions(
-        self, messages: list[dict], functions: list[dict], function_call: str = "auto"
-    ):
-        return self.openai_client.chat.completions.create(
-            model=self.llm_model,
-            messages=messages,
-            functions=functions,
-            function_call=function_call,
-        )
+    # def get_genai_response(self, prompt):
+    #     response = self.genai_client.generate(
+    #         model=GENAI_MODEL_NAME,
+    #         prompt=prompt,
+    #         temperature=GENAI_TEMPERATURE,
+    #         max_tokens=GENAI_MAXTOKENS
+    #     )
+    #     return response
 
-    def get_chat_completion(
-        self, messages: list[dict], model: str | None = None, **kwargs
-    ):
-        return self.openai_client.chat.completions.create(
-            model=model or self.llm_model,
-            messages=messages,
-            max_tokens=self.llm_max_tokens,
-            **kwargs
-        )
-
-    def get_sk_chat_completion_service(self, service_id: str):
-        if self.auth_type_keys:
-            return AzureChatCompletion(
-                service_id=service_id,
-                deployment_name=self.llm_model,
-                endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
-                api_version=self.env_helper.AZURE_OPENAI_API_VERSION,
-                api_key=self.env_helper.OPENAI_API_KEY,
-            )
-        else:
-            return AzureChatCompletion(
-                service_id=service_id,
-                deployment_name=self.llm_model,
-                endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
-                api_version=self.env_helper.AZURE_OPENAI_API_VERSION,
-                ad_token_provider=self.token_provider,
-            )
+    # def generate_groq_embeddings(self, data):
+    #     embedding = self.groq_client.embeddings.create(
+    #         model=GROQ_MODEL_NAME,
+    #         input=data
+    #     )
+    #     return embedding.data[0].embedding
