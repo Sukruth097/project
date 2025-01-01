@@ -2,6 +2,7 @@ import time
 from datetime import datetime
 import os
 import socket
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 # TIMESTAMP = time.strftime("%Y-%m-%d %I:%M:%S %p", time.localtime())
 TIMESTAMP:str = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
 ARTIFACT_DIR = os.path.join("artifacts",TIMESTAMP)
@@ -11,6 +12,12 @@ LOGS_COLLECTION_NAME="logging"
 ERROR_COLLECTION_NAME="poc_error_logs"
 CONTAINER_NAME="testindex-chunks"
 BLOB_NAME="cracked-output"
+AZURE_AUTH_TYPE = os.getenv("AZURE_AUTH_TYPE", "keys")
+# def is_auth_type_keys():
+#         return AZURE_AUTH_TYPE == "keys"
+AZURE_TOKEN_PROVIDER = get_bearer_token_provider(
+            DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+        )
 
 ### Data Ingestion Constants
 DATA_INGESTION_ARTIFACT_DIR = 'DataIngestion'

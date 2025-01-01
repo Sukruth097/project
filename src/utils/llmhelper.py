@@ -2,54 +2,145 @@ from openai import AzureOpenAI
 import google.generativeai as genai
 import os
 from groq import Groq
+from langchain_openai import AzureChatOpenAI
+from langchain_openai import AzureOpenAIEmbeddings
+from src.config.constants import *
+from dotenv import load_dotenv
 
+load_dotenv()
 
-class LLMs:
+class LLMHelper:
+    def __init__(self):
+        # self.env_helper: EnvHelper = EnvHelper()
+        self.auth_type_keys = self.env_helper.is_auth_type_keys()
+        self.token_provider = self.env_helper.AZURE_TOKEN_PROVIDER
 
-    def __init__(self, azure_openai_key, gemini_pro_key, grog_llama_key):
-        self.azure_openai_key = azure_openai_key
-        self.gemini_pro_key = gemini_pro_key
-        self.grog_llama_key = grog_llama_key
-
-    def azure_openai(self):
-        
-        client = AzureOpenAI(
-            api_key=os.getenv("AZURE_OPENAI_API_KEY"),  
-            api_version="2024-10-21",
-            azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+        if self.auth_type_keys:
+            self.openai_client = AzureOpenAI(
+                azure_endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
+                api_version=self.env_helper.AZURE_OPENAI_API_VERSION,
+                api_key=self.env_helper.OPENAI_API_KEY,
             )
-        
-        response = client.chat.completions.create(
-        model="gpt-4o", 
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "When was Microsoft founded?"}
-        ]
+        else:
+            self.openai_client = AzureOpenAI(
+                azure_endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
+                api_version=self.env_helper.AZURE_OPENAI_API_VERSION,
+                azure_ad_token_provider=self.token_provider,
+            )
+
+        self.llm_model = self.env_helper.AZURE_OPENAI_MODEL
+        self.llm_max_tokens = (
+            int(self.env_helper.AZURE_OPENAI_MAX_TOKENS)
+            if self.env_helper.AZURE_OPENAI_MAX_TOKENS != ""
+            else None
+        )
+        self.embedding_model = self.env_helper.AZURE_OPENAI_EMBEDDING_MODEL
+
+    def get_llm(self):
+        if self.auth_type_keys:
+            return AzureChatOpenAI(
+                deployment_name=self.llm_model,
+                temperature=0,
+                max_tokens=self.llm_max_tokens,
+                openai_api_version=self.openai_client._api_version,
+                azure_endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
+                api_key=self.env_helper.OPENAI_API_KEY,
+            )
+        else:
+            return AzureChatOpenAI(
+                deployment_name=self.llm_model,
+                temperature=0,
+                max_tokens=self.llm_max_tokens,
+                openai_api_version=self.openai_client._api_version,
+                azure_endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
+                azure_ad_token_provider=self.token_provider,
+            )
+
+    # TODO: This needs to have a custom callback to stream back to the UI
+    def get_streaming_llm(self):
+        if self.auth_type_keys:
+            return AzureChatOpenAI(
+                azure_endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
+                api_key=self.env_helper.OPENAI_API_KEY,
+                streaming=True,
+                # callbacks=[StreamingStdOutCallbackHandler],
+                deployment_name=self.llm_model,
+                temperature=0,
+                max_tokens=self.llm_max_tokens,
+                openai_api_version=self.openai_client._api_version,
+            )
+        else:
+            return AzureChatOpenAI(
+                azure_endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
+                api_key=self.env_helper.OPENAI_API_KEY,
+                streaming=True,
+                # callbacks=[StreamingStdOutCallbackHandler],
+                deployment_name=self.llm_model,
+                temperature=0,
+                max_tokens=self.llm_max_tokens,
+                openai_api_version=self.openai_client._api_version,
+                azure_ad_token_provider=self.token_provider,
+            )
+
+    def get_embedding_model(self):
+        if self.auth_type_keys:
+            return AzureOpenAIEmbeddings(
+                azure_endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
+                api_key=self.env_helper.OPENAI_API_KEY,
+                azure_deployment=self.embedding_model,
+                chunk_size=1,
+            )
+        else:
+            return AzureOpenAIEmbeddings(
+                azure_endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
+                azure_deployment=self.embedding_model,
+                chunk_size=1,
+                azure_ad_token_provider=self.token_provider,
+            )
+
+    def generate_embeddings(self, input: Union[str, list[int]]) -> List[float]:
+        return (
+            self.openai_client.embeddings.create(
+                input=[input], model=self.embedding_model
+            )
+            .data[0]
+            .embedding
         )
 
-        return response.choices[0].message.content
-
-    def gemini_pro(self, search_indexes):
-        
-        genai.configure(api_key="YOUR_API_KEY")
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content("Explain how AI works")
-
-        return response.text.strip()
-
-    def grog_llama(self, search_indexes):
-        # Assuming grog_llama has a similar API to OpenAI
-        client = Groq(
-                api_key=os.environ.get("GROQ_API_KEY"),
-                )
- 
-        chat_completion = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "user",
-                    "content": "Explain the importance of fast language models",
-                }
-            ],
-            model="llama3-8b-8192",
+    def get_chat_completion_with_functions(
+        self, messages: list[dict], functions: list[dict], function_call: str = "auto"
+    ):
+        return self.openai_client.chat.completions.create(
+            model=self.llm_model,
+            messages=messages,
+            functions=functions,
+            function_call=function_call,
         )
-        return chat_completion.choices[0].message.content
+
+    def get_chat_completion(
+        self, messages: list[dict], model: str | None = None, **kwargs
+    ):
+        return self.openai_client.chat.completions.create(
+            model=model or self.llm_model,
+            messages=messages,
+            max_tokens=self.llm_max_tokens,
+            **kwargs
+        )
+
+    def get_sk_chat_completion_service(self, service_id: str):
+        if self.auth_type_keys:
+            return AzureChatCompletion(
+                service_id=service_id,
+                deployment_name=self.llm_model,
+                endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
+                api_version=self.env_helper.AZURE_OPENAI_API_VERSION,
+                api_key=self.env_helper.OPENAI_API_KEY,
+            )
+        else:
+            return AzureChatCompletion(
+                service_id=service_id,
+                deployment_name=self.llm_model,
+                endpoint=self.env_helper.AZURE_OPENAI_ENDPOINT,
+                api_version=self.env_helper.AZURE_OPENAI_API_VERSION,
+                ad_token_provider=self.token_provider,
+            )
