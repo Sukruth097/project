@@ -22,6 +22,7 @@ AZURE_OPENAI_TEMPERATURE= 0
 AZURE_TOKEN_PROVIDER = get_bearer_token_provider(
             DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
         )
+WEAVIATE_COLLECTION_NAME="RAGEducationalGDocuments"
 
 ### Data Ingestion Constants
 DATA_INGESTION_ARTIFACT_DIR = 'DataIngestion'
