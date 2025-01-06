@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class LLMHelper:
-    def __init__(self):
-        self.auth_type_keys = AZURE_AUTH_TYPE
+    def __init__(self,auth_type_keys):
+        self.auth_type_keys = auth_type_keys
         self.token_provider = AZURE_TOKEN_PROVIDER
 
         if self.auth_type_keys:

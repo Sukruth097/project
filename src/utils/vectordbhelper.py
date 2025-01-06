@@ -43,16 +43,15 @@ class VectorDatabaseHelper:
         
     def w_create_collection(self,collection_name:str=WEAVIATE_COLLECTION_NAME):
         try:
-            existing_collections = self.weaviate_client.collections.list_all()
-            if collection_name in existing_collections:
-                print(f"Collection '{collection_name}' already exists in Weaviate client.")
-            else:
+            if collection_name not in self.weaviate_client.collections.list_all():
                 self.weaviate_client.collections.create(
                     name=collection_name,
                     properties=self.define_propeties(),
                     vectorizer_config=None
                 )
                 print(f"Collection '{collection_name}' created successfully.")
+            else:
+                print(f"Collection '{collection_name}' already exists in Weaviate client.")
         except Exception as e:
             print(f"Error while creating collection: {str(e)}")
             raise PocException(f"Error while creating collection: {str(e)}")
