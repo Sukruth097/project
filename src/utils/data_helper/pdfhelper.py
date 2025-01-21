@@ -5,6 +5,7 @@ from unstructured.documents.elements import Table, Image, NarrativeText
 from langchain_core.prompts import ChatPromptTemplate
 from src.config.constants import *
 import sys
+import base64
 from src.exception import PocException
 from src.utils import log_execution_time
 from src.logger import logger
@@ -48,17 +49,14 @@ class PDFFileHandler:
         logger.info(f"Extracting text elements from file: {file_name}")
         try:
             text_data = []
-            prompt = ChatPromptTemplate.from_template(tables_summarizer_prompt)
             for element in raw_pdf_elements:
                 if isinstance(element, NarrativeText):
                     page_number = element.metadata.page_number
-                    table_content = element.text
-                    table_description = self.llm_model.get_openai_llm(messages=prompt)
+                    text_content = element.text
                     text_data.append({
                         "source_pdf": file_name,
                         "page_number": page_number,
-                        "text": table_content,
-                        "description": table_description
+                        "text": text_content,
                     })
             logger.info(f"Extracted {len(text_data)} text elements from file: {file_name}")
             return text_data
@@ -75,13 +73,21 @@ class PDFFileHandler:
 
             for element in raw_pdf_elements:
                 if isinstance(element, Image):
-                    image_page_number = element.metadata.page_number
+                    image_page_number = element.metadata.page_number if hasattr(element.metadata, 'page_number') else None
                     image_path = element.metadata.image_path if hasattr(element.metadata, 'image_path') else None
+                    
+                    image_description = self.llm_model.get_openai_llm(messages=prompt)
+
+                    # Read the image file and encode it to base64
+                    with open(image_path, "rb") as image_file:
+                        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
 
                     images_elements.append({
                         "page_number": image_page_number,
                         "image_path": image_path,
-                        "source_pdf": file_name
+                        "source_pdf": file_name,
+                        "description": image_description,
+                        "base64_encoding": encoded_string
                     })
             logger.info(f"Extracted {len(images_elements)} images from file: {file_name}")
             return images_elements
