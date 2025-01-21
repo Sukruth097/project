@@ -10,6 +10,7 @@ from src.utils import log_execution_time
 from src.logger import logger
 from tqdm.asyncio import tqdm_asyncio
 from utils.llmhelper import LLMHelper
+from utils.prompt_template import tables_summarizer_prompt,image_summarizer_prompt
 
 os.makedirs(os.path.join(os.getcwd(), "images"), exist_ok=True)
 
@@ -20,7 +21,6 @@ class PDFFileHandler:
         self.files = [file for file in os.listdir(self.data_folder) if file.endswith(".pdf")]
         logger.info(f"Initialized PDFFileHandler with {len(self.files)} PDF files: {self.files}")
         self.llm_model = LLMHelper()
-        
     
     @log_execution_time
     async def pdf_loader(self, file_name: str):
@@ -52,12 +52,12 @@ class PDFFileHandler:
             for element in raw_pdf_elements:
                 if isinstance(element, NarrativeText):
                     page_number = element.metadata.page_number
-                    text_content = element.text
-                    table_description = self.llm_model.get_openai_llm(messages=text_content)
+                    table_content = element.text
+                    table_description = self.llm_model.get_openai_llm(messages=prompt)
                     text_data.append({
                         "source_pdf": file_name,
                         "page_number": page_number,
-                        "text": text_content,
+                        "text": table_content,
                         "description": table_description
                     })
             logger.info(f"Extracted {len(text_data)} text elements from file: {file_name}")
@@ -71,6 +71,8 @@ class PDFFileHandler:
         logger.info(f"Extracting images from file: {file_name}")
         try:
             images_elements = []
+            prompt = ChatPromptTemplate.from_template(image_summarizer_prompt)
+
             for element in raw_pdf_elements:
                 if isinstance(element, Image):
                     image_page_number = element.metadata.page_number
