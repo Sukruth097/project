@@ -7,7 +7,10 @@ information while maintaining precision in your response.Avoid bullet points.
 """
 
 images_summarizer_prompt = """
-You are an advanced assistant specializing in image summarization also avoid the bullet points. Your task is to provide precise, accurate, and concise descriptions of the image without any hallucination.
+You are an advanced assistant specializing in image summarization also avoid the bullet points.
+Your task is to provide precise, accurate,
+and concise descriptions of the image without any hallucination.
+Do not exceed more than 2-3 snetences.
  
 Summary:
 """

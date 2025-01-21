@@ -10,8 +10,8 @@ from src.exception import PocException
 from src.utils import log_execution_time
 from src.logger import logger
 from tqdm.asyncio import tqdm_asyncio
-from utils.llmhelper import LLMHelper
-from utils.prompt_template import tables_summarizer_prompt,images_summarizer_prompt
+from src.utils.llmhelper import LLMHelper
+from src.utils.prompt_template import tables_summarizer_prompt,images_summarizer_prompt
 
 os.makedirs(os.path.join(os.getcwd(), "images"), exist_ok=True)
 
@@ -51,7 +51,7 @@ class PDFFileHandler:
             text_data = []
             for element in raw_pdf_elements:
                 if isinstance(element, NarrativeText):
-                    page_number = element.metadata.page_number
+                    page_number = element.metadata.page_number if hasattr(element.metadata, 'page_number') else None
                     text_content = element.text
                     text_data.append({
                         "source_pdf": file_name,
@@ -69,14 +69,16 @@ class PDFFileHandler:
         logger.info(f"Extracting images from file: {file_name}")
         try:
             images_elements = []
-            prompt = ChatPromptTemplate.from_template(images_summarizer_prompt)
+            # image_prompt = ChatPromptTemplate.from_template(images_summarizer_prompt)
 
             for element in raw_pdf_elements:
                 if isinstance(element, Image):
                     image_page_number = element.metadata.page_number if hasattr(element.metadata, 'page_number') else None
                     image_path = element.metadata.image_path if hasattr(element.metadata, 'image_path') else None
+                    logger.info("Generating OpenAI response for image at path: %s", image_path)
+                    encoded_image = base64.b64encode(open(image_path, 'rb').read()).decode('ascii')
                     
-                    image_description = self.llm_model.azureopenai_with_image(image_path, prompt)
+                    image_description = self.llm_model.azureopenai_with_image(encoded_image=encoded_image, images_summarizer_prompt=images_summarizer_prompt)
 
                     with open(image_path, "rb") as image_file:
                         encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
@@ -103,7 +105,7 @@ class PDFFileHandler:
 
             for element in raw_pdf_elements:
                 if isinstance(element, Table):
-                    table_page_number = element.metadata.page_number
+                    table_page_number = element.metadata.page_number if hasattr(element.metadata, 'page_number') else None
                     table_content = str(element)
                     message = table_prompt.format(table_content=table_content)
                     table_description = self.llm_model.get_openai_llm(messages=message)
@@ -170,11 +172,12 @@ class PDFFileHandler:
             raise PocException(e, sys)
 
 
-# if __name__ == "__main__":
-#     path = os.path.join(os.getcwd(), "artifacts/12_25_2024_17_00_49/DataIngestion/rawdata/cracked-output")
+if __name__ == "__main__":
+    path = os.path.join(os.getcwd(), "./project/data")
+    print(os.listdir(path))
 
-#     pdf_file_handler = PDFFileHandler(output_dir=path)
-#     all_text, all_images, all_table = asyncio.run(pdf_file_handler.run_pdf_processing())
-#     print(all_text[0])
-    # print(all_images)
-    # print(all_table)
+    pdf_file_handler = PDFFileHandler(output_dir=path)
+    all_text, all_images, all_table = asyncio.run(pdf_file_handler.run_pdf_processing())
+    print(all_text[0])
+    print(all_images[0])
+    print(all_table[0])

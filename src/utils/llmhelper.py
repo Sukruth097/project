@@ -63,44 +63,22 @@ class LLMHelper:
             logger.error("Error in generate_openai_embeddings: %s", str(e))
             raise PocException("Failed to generate OpenAI embeddings") from e
 
-    def azureopenai_with_image(self, image_path, images_summarizer_prompt):
+    def azureopenai_with_image(self,encoded_image,images_summarizer_prompt):
         try:
-            logger.info("Generating OpenAI response for image at path: %s", image_path)
-            encoded_image = base64.b64encode(open(image_path, 'rb').read()).decode('ascii')
             
             messages = [
                 {
                     "role": "system",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "You are an AI assistant that helps people find information."
-                        }
-                    ]
+                    "content": "You are an AI assistant that helps people find information."
                 },
                 {
                     "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "\n"
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpg;base64,{encoded_image}"
-                            }
-                        },
-                        {
-                            "type": "text",
-                            "text": images_summarizer_prompt
-                        }
-                    ]
+                    "content": f"data:image/jpg;base64,{encoded_image}\n{images_summarizer_prompt}"
                 }
             ]
    
             completion = self.openai_client.chat.completions.create(  
-                model="llm-gpt-4o",  
+                model=AZURE_OPENAI_DEPLOYMENT_NAME,  
                 messages=messages,  
                 temperature=0
             )
