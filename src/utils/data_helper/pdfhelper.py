@@ -11,7 +11,7 @@ from src.utils import log_execution_time
 from src.logger import logger
 from tqdm.asyncio import tqdm_asyncio
 from utils.llmhelper import LLMHelper
-from utils.prompt_template import tables_summarizer_prompt,image_summarizer_prompt
+from utils.prompt_template import tables_summarizer_prompt,images_summarizer_prompt
 
 os.makedirs(os.path.join(os.getcwd(), "images"), exist_ok=True)
 
@@ -69,16 +69,15 @@ class PDFFileHandler:
         logger.info(f"Extracting images from file: {file_name}")
         try:
             images_elements = []
-            prompt = ChatPromptTemplate.from_template(image_summarizer_prompt)
+            prompt = ChatPromptTemplate.from_template(images_summarizer_prompt)
 
             for element in raw_pdf_elements:
                 if isinstance(element, Image):
                     image_page_number = element.metadata.page_number if hasattr(element.metadata, 'page_number') else None
                     image_path = element.metadata.image_path if hasattr(element.metadata, 'image_path') else None
                     
-                    image_description = self.llm_model.get_openai_llm(messages=prompt)
+                    image_description = self.llm_model.azureopenai_with_image(image_path, prompt)
 
-                    # Read the image file and encode it to base64
                     with open(image_path, "rb") as image_file:
                         encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
 
@@ -100,15 +99,20 @@ class PDFFileHandler:
         logger.info(f"Extracting table elements from file: {file_name}")
         try:
             table_element = []
+            table_prompt = ChatPromptTemplate.from_template(tables_summarizer_prompt)
+
             for element in raw_pdf_elements:
                 if isinstance(element, Table):
                     table_page_number = element.metadata.page_number
                     table_content = str(element)
+                    message = table_prompt.format(table_content=table_content)
+                    table_description = self.llm_model.get_openai_llm(messages=message)
 
                     table_element.append({
                         "page_number": table_page_number,
                         "table_content": table_content,
-                        "source_pdf": file_name
+                        "source_pdf": file_name,
+                        "description": table_description
                     })
             logger.info(f"Extracted {len(table_element)} table elements from file: {file_name}")
             return table_element
