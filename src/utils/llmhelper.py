@@ -64,8 +64,7 @@ class LLMHelper:
             raise PocException("Failed to generate OpenAI embeddings") from e
 
     def azureopenai_with_image(self,encoded_image,images_summarizer_prompt):
-        try:
-            
+        try: 
             messages = [
                 {
                     "role": "system",

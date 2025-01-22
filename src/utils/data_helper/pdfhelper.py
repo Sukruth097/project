@@ -75,21 +75,24 @@ class PDFFileHandler:
                 if isinstance(element, Image):
                     image_page_number = element.metadata.page_number if hasattr(element.metadata, 'page_number') else None
                     image_path = element.metadata.image_path if hasattr(element.metadata, 'image_path') else None
-                    logger.info("Generating OpenAI response for image at path: %s", image_path)
-                    encoded_image = base64.b64encode(open(image_path, 'rb').read()).decode('ascii')
-                    
-                    image_description = self.llm_model.azureopenai_with_image(encoded_image=encoded_image, images_summarizer_prompt=images_summarizer_prompt)
+                    if image_path and os.path.exists(image_path):
+                        logger.info("Generating OpenAI response for image at path: %s", image_path)
+                        encoded_image = base64.b64encode(open(image_path, 'rb').read()).decode('ascii')
+                        
+                        image_description = self.llm_model.azureopenai_with_image(encoded_image=encoded_image, images_summarizer_prompt=images_summarizer_prompt)
 
-                    with open(image_path, "rb") as image_file:
-                        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                        with open(image_path, "rb") as image_file:
+                            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
 
-                    images_elements.append({
-                        "page_number": image_page_number,
-                        "image_path": image_path,
-                        "source_pdf": file_name,
-                        "description": image_description,
-                        "base64_encoding": encoded_string
-                    })
+                        images_elements.append({
+                            "page_number": image_page_number,
+                            "image_path": image_path,
+                            "source_pdf": file_name,
+                            "description": image_description,
+                            "base64_encoding": encoded_string
+                        })
+                    else:
+                        print(f"Warning: Image file not found or path not available for image on page {image_page_number}")
             logger.info(f"Extracted {len(images_elements)} images from file: {file_name}")
             return images_elements
         except Exception as e:
@@ -173,7 +176,7 @@ class PDFFileHandler:
 
 
 if __name__ == "__main__":
-    path = os.path.join(os.getcwd(), "./project/data")
+    path = os.path.join(os.getcwd(), "./data")
     print(os.listdir(path))
 
     pdf_file_handler = PDFFileHandler(output_dir=path)
