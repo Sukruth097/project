@@ -11,7 +11,9 @@ from src.utils import log_execution_time
 from src.logger import logger
 from tqdm.asyncio import tqdm_asyncio
 from src.utils.llmhelper import LLMHelper
-from src.utils.prompt_template import tables_summarizer_prompt,images_summarizer_prompt
+from src.utils.prompt_template import tables_summarizer_prompt, images_summarizer_prompt
+from openai import AzureOpenAI
+
 
 os.makedirs(os.path.join(os.getcwd(), "images"), exist_ok=True)
 
@@ -42,7 +44,7 @@ class PDFFileHandler:
             return raw_pdf_elements
         except Exception as e:
             logger.error(f"Error loading PDF file: {file_name}, Error: {e}")
-            raise PocException(e, sys)
+            raise PocException(e, sys.exc_info())
 
     @log_execution_time
     async def extract_text_elements(self, raw_pdf_elements, file_name):
@@ -62,42 +64,77 @@ class PDFFileHandler:
             return text_data
         except Exception as e:
             logger.error(f"Error extracting text elements from file: {file_name}, Error: {e}")
-            raise PocException(e, sys)
+            raise PocException(e, sys.exc_info())
 
     @log_execution_time
     async def extract_images(self, raw_pdf_elements, file_name):
         logger.info(f"Extracting images from file: {file_name}")
         try:
             images_elements = []
-            # image_prompt = ChatPromptTemplate.from_template(images_summarizer_prompt)
-
             for element in raw_pdf_elements:
-                if isinstance(element, Image):
-                    image_page_number = element.metadata.page_number if hasattr(element.metadata, 'page_number') else None
+                if "Image" in str(type(element)):
+                    page_number = element.metadata.page_number if hasattr(element.metadata, 'page_number') else None
                     image_path = element.metadata.image_path if hasattr(element.metadata, 'image_path') else None
+
                     if image_path and os.path.exists(image_path):
-                        logger.info("Generating OpenAI response for image at path: %s", image_path)
                         encoded_image = base64.b64encode(open(image_path, 'rb').read()).decode('ascii')
-                        
-                        image_description = self.llm_model.azureopenai_with_image(encoded_image=encoded_image, images_summarizer_prompt=images_summarizer_prompt)
+
+                        messages = [
+                            {
+                                "role": "system",
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": "You are an AI assistant that helps people find information."
+                                    }
+                                ]
+                            },
+                            {
+                                "role": "user",
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": "\n"
+                                    },
+                                    {
+                                        "type": "image_url",
+                                        "image_url": {
+                                            "url": f"data:image/jpg;base64,{encoded_image}"
+                                        }
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": images_summarizer_prompt
+                                    }
+                                ]
+                            }
+                        ]
+                        client = AzureOpenAI(
+                            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+                            api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-08-01-preview"),
+                            api_key=os.getenv("AZURE_OPENAI_API_KEY")
+                        )
+                        completion = client.chat.completions.create(
+                            model="llm-gpt-4o",
+                            messages=messages,
+                            temperature=0,
+                        )
+                        description = completion.choices[0].message.content
 
                         with open(image_path, "rb") as image_file:
                             encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
 
                         images_elements.append({
-                            "page_number": image_page_number,
+                            "source_document": "./Share MTS_07_m.pdf",
+                            "page_number": page_number,
                             "image_path": image_path,
-                            "source_pdf": file_name,
-                            "description": image_description,
+                            "description": description,
                             "base64_encoding": encoded_string
                         })
-                    else:
-                        print(f"Warning: Image file not found or path not available for image on page {image_page_number}")
-            logger.info(f"Extracted {len(images_elements)} images from file: {file_name}")
             return images_elements
         except Exception as e:
             logger.error(f"Error extracting images from file: {file_name}, Error: {e}")
-            raise PocException(e, sys)
+            raise PocException(e, sys.exc_info())
     
     @log_execution_time
     async def extract_table_elements(self, raw_pdf_elements, file_name):
@@ -111,7 +148,8 @@ class PDFFileHandler:
                     table_page_number = element.metadata.page_number if hasattr(element.metadata, 'page_number') else None
                     table_content = str(element)
                     message = table_prompt.format(table_content=table_content)
-                    table_description = self.llm_model.get_openai_llm(messages=message)
+                    messages = [{"role": "user", "content": message}]
+                    table_description = self.llm_model.get_openai_llm(messages=messages)
 
                     table_element.append({
                         "page_number": table_page_number,
@@ -123,7 +161,7 @@ class PDFFileHandler:
             return table_element
         except Exception as e:
             logger.error(f"Error extracting table elements from file: {file_name}, Error: {e}")
-            raise PocException(e)
+            raise PocException(e, sys.exc_info())
     
     @log_execution_time
     async def extract_all_text_and_images(self):
@@ -150,7 +188,7 @@ class PDFFileHandler:
             return all_text, all_images, all_tables
         except Exception as e:
             logger.error(f"Error extracting all text and images, Error: {e}")
-            raise PocException(e, sys)
+            raise PocException(e, sys.exc_info())
 
     @log_execution_time
     async def process_file(self, file):
@@ -172,7 +210,7 @@ class PDFFileHandler:
             return all_text, all_images, all_tables
         except Exception as e:
             logger.error(f"Error in PDF processing, Error: {e}")
-            raise PocException(e, sys)
+            raise PocException(e, sys.exc_info())
 
 
 if __name__ == "__main__":
@@ -182,5 +220,5 @@ if __name__ == "__main__":
     pdf_file_handler = PDFFileHandler(output_dir=path)
     all_text, all_images, all_table = asyncio.run(pdf_file_handler.run_pdf_processing())
     print(all_text[0])
-    print(all_images[0])
+    print(all_images[0]['description'])
     print(all_table[0])
