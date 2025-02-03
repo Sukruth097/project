@@ -7,6 +7,6 @@ class DataIngestionArtifact:
 
 @dataclass
 class DataTransformationArtifact:
-    pdf_data :str
+    text_data :str
     image_data :str
     table_data :str
