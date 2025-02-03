@@ -156,8 +156,6 @@ class VectorDatabaseHelper:
             logger.info("Ingestion of table data is completed")
             print("Succesfully ingested all the data")
 
-
-
             if len(collection.batch.failed_objects) > 0:
                 logger.error(f"Failed to import {len(collection.batch.failed_objects)} objects")
             else:

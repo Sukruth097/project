@@ -26,7 +26,7 @@ if __name__ == "__main__":
     dta = DataTransformationArtifact()
     vcc = "vectordatabase_config"
     svb= VectorDatabase(vcc,dta)
-    svb.store_records_to_db(collection_name="rag")
+    svb.store_records_to_db(collection_name="RAGEducationalGDocuments")
 
 
 
